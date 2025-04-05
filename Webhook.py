@@ -76,6 +76,7 @@ def wazuh_webhook():
     try:
         alert_payload = request.json
         print("Payload received")
+        print(alert_payload)
 
         # Optional: Log the raw payload (consider size and security)
         # try:
@@ -112,12 +113,12 @@ def wazuh_webhook():
             # A better approach involves linking via a unique alert ID if available in response.
             update_sql = """
                 UPDATE alert
-                SET status = %s, full_response = %s
+                SET status = %s, full_response = %s, responder = %s , response_desc = %s
                 WHERE time = %s
             """
             # Store the entire response payload as a JSON string
             full_response_json = json.dumps(alert_payload)
-            values = ("resolved", full_response_json, original_timestamp_dt) # Use datetime object directly
+            values = ("resolved", full_response_json, "Auto-response by wazuh",alert_payload["rule"]["description"],original_timestamp_dt) # Use datetime object directly
 
             cursor.execute(update_sql, values)
             conn.commit() # Commit the transaction
@@ -155,12 +156,12 @@ def wazuh_webhook():
             src_port = event_data.get('SourcePort') # Defaults to None if not found
 
             # Construct source string carefully, handling None values
-            if src_ip and src_port:
-                source_combined = f"{src_ip}:{src_port}"
-            elif src_ip:
-                source_combined = src_ip
+            if "suricata" in alert_payload :
+                source_combined = alert_payload["_source"]["data"]["dest_ip"]
+            elif alert_payload["agent"]["name"] == "ubuntu-apatch2":
+                source_combined = alert_payload["data"]["srcip"]
             else:
-                source_combined = 'Unknown' # Or set to None if column allows NULL
+                source_combined = f'Local in {alert_payload["agent"]["name"]}' # Or set to None if column allows NULL
 
             # Set initial status and full alert JSON
             status = "pending"
@@ -243,4 +244,4 @@ def wazuh_webhook():
 if __name__ == '__main__':
     # Make sure host='0.0.0.0' is intended (listens on all interfaces)
     # Remove debug=True for production environments
-    app.run(host='0.0.0.0', port=5000, debug=True)                                                                  
+    app.run(host='0.0.0.0', port=5000, debug=True)
