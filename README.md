@@ -16,6 +16,10 @@ Edit the `ossec.conf` file to add a custom integration for the webhook:
     <name>custom-webhookpy</name>
     <hook_url>http://<WEBHOOK_SERVER_IP>:5000/wazuh-webhook</hook_url>
     <level><MIN_ALERT_LEVEL></level>
+     <!--           OR 
+      <rule_id> </rule_id>
+      <group> </group>
+    -->
     <alert_format>json</alert_format>
 </integration>
 ```
