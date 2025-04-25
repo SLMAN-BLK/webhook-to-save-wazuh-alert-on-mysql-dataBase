@@ -148,6 +148,7 @@ Run the webhook server:
 
 ```sh
 python webhook.py
+run at the background : nohup python3 webhook.py > webhook.log 2>&1 &
 ```
 
 ## ✅ Testing the Integration
