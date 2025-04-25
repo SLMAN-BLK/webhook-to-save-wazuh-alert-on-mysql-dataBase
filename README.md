@@ -104,6 +104,7 @@ On the machine running the webhook server (`192.168.2.30` in our example), insta
 
 ```sh
 pip install flask
+pip install mysql
 ```
 
 Create the webhook server script:
